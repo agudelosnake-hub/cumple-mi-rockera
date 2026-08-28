@@ -15,6 +15,7 @@
 <meta name="twitter:title" content="🎸 ¡Feliz Cumpleaños Mi Rockera! 🤘">
 <meta name="twitter:description" content="Tengo Una Sorpresa Especial Para Ti...">
 <meta name="twitter:image" content="https://i.imgur.com/NVKqW6S.jpeg">
+
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Fredoka+One&family=Russo+One&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -135,11 +136,11 @@
     50% { transform: rotate(10deg); }
   }
 
+  /* ✅ MEJORA 1: EFECTO NEÓN PARPADEANTE EN EL TÍTULO */
   .title {
     font-family: 'Anton', sans-serif;
     font-size: clamp(36px, 12vw, 55px);
     margin: 15px 0;
-    animation: titlePulse 1.5s infinite;
     letter-spacing: 3px;
     line-height: 1.1;
     padding: 0 10px;
@@ -156,13 +157,21 @@
     );
     -webkit-background-clip: text;
     -webkit-text-stroke: 2px #fff;
-    filter: drop-shadow(5px 5px 0 #1a0033);
-    text-shadow: none;
+    animation: titlePulse 1.5s infinite, neonFlicker 3s infinite alternate;
   }
 
   @keyframes titlePulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
+  }
+
+  @keyframes neonFlicker {
+    0%, 18%, 22%, 25%, 53%, 57%, 100% {
+      filter: drop-shadow(5px 5px 0 #1a0033) drop-shadow(0 0 10px #ff0066) drop-shadow(0 0 20px #ff0066) drop-shadow(0 0 40px #ff0066);
+    }
+    20%, 24%, 55% {
+      filter: drop-shadow(5px 5px 0 #1a0033) drop-shadow(0 0 5px #ff0066) drop-shadow(0 0 10px #ff0066);
+    }
   }
 
   .name {
@@ -328,18 +337,17 @@
     padding: 0 10px;
   }
 
+  /* ✅ MEJORA 1: EFECTO NEÓN TAMBIÉN EN EL TQM GRANDE */
   .final-message .tqm-big {
     font-family: 'Fredoka One', cursive;
     font-size: clamp(70px, 20vw, 90px);
     margin: 20px 0;
-    animation: heartbeat 1s infinite;
     display: inline-block;
     letter-spacing: 5px;
     background: linear-gradient(180deg, #ffeb3b 0%, #ff9800 25%, #e91e63 50%, #9c27b0 75%, #673ab7 100%);
     -webkit-background-clip: text;
     -webkit-text-stroke: 4px #fff;
-    filter: drop-shadow(6px 6px 0 #1a0033) drop-shadow(0 0 30px rgba(233,30,99,0.8));
-    text-shadow: none;
+    animation: heartbeat 1s infinite, neonFlicker 3s infinite alternate;
   }
 
   @keyframes heartbeat {
@@ -349,6 +357,7 @@
     75% { transform: scale(1.05); }
   }
 
+  /* ✅ MEJORA 2: BOTÓN DE SORPRESA ULTRA-DRAMÁTICO */
   .surprise-btn {
     position: fixed;
     bottom: 20px;
@@ -361,21 +370,44 @@
     border-radius: 50px;
     font-size: clamp(15px, 4.5vw, 18px);
     font-weight: 700;
-    box-shadow: 0 6px 20px rgba(255, 0, 102, 0.5);
     cursor: pointer;
     z-index: 20;
-    animation: bounceBtn 2s infinite;
     font-family: 'Russo One', sans-serif;
     letter-spacing: 1px;
     white-space: nowrap;
     max-width: 90%;
     text-shadow: 2px 2px 0 #000;
     -webkit-tap-highlight-color: rgba(255, 0, 102, 0.5);
+    animation: bounceBtn 2s infinite, glowPulse 1.5s infinite alternate;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .surprise-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: rotate(45deg);
+    animation: shineBtn 2.5s infinite;
   }
 
   @keyframes bounceBtn {
     0%, 100% { transform: translateX(-50%) translateY(0); }
     50% { transform: translateX(-50%) translateY(-10px); }
+  }
+
+  @keyframes glowPulse {
+    0% { box-shadow: 0 6px 20px rgba(255, 0, 102, 0.5), 0 0 10px #ff0066; }
+    100% { box-shadow: 0 6px 30px rgba(255, 0, 102, 0.9), 0 0 20px #ff0066, 0 0 40px #ff9800; }
+  }
+
+  @keyframes shineBtn {
+    0% { transform: translateX(-150%) rotate(45deg); }
+    100% { transform: translateX(150%) rotate(45deg); }
   }
 
   .surprise-btn:active { transform: translateX(-50%) scale(0.95); }
@@ -596,7 +628,8 @@
   <div class="hint"> Toca Los Vales Para Reclamarlos</div>
 
 <script>
-  const hearts = ['❤️','🖤','💜','💗','🎸','🤘','⭐','💀','💕','🔥'];
+  // ✅ MEJORA 3: CONFETI ADICIONAL (Más variedad de emojis festivos)
+  const hearts = ['❤️','🖤','💜','💗','🎸','🤘','⭐','✨','💫','🎊','🎉','🔥','💀','💕'];
   const notes = ['🎵','🎶','🎼','🎤','🎧'];
 
   // Función unificada para manejar clicks y toques
@@ -607,13 +640,13 @@
     
     if (!x || !y) return;
     
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 12; i++) { // Aumentado a 12 para más explosión
       const heart = document.createElement('div');
       heart.className = 'explode-heart';
       heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
       heart.style.left = x + 'px';
       heart.style.top = y + 'px';
-      const angle = (Math.PI * 2 * i) / 10;
+      const angle = (Math.PI * 2 * i) / 12;
       const dist = Math.random() * 100 + 60;
       heart.style.setProperty('--ex', Math.cos(angle) * dist + 'px');
       heart.style.setProperty('--ey', Math.sin(angle) * dist + 'px');
@@ -683,13 +716,13 @@
       const rect = vale.getBoundingClientRect();
       const x = rect.left + rect.width / 2;
       const y = rect.top + rect.height / 2;
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 12; i++) {
         const heart = document.createElement('div');
         heart.className = 'explode-heart';
         heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
         heart.style.left = x + 'px';
         heart.style.top = y + 'px';
-        const angle = (Math.PI * 2 * i) / 10;
+        const angle = (Math.PI * 2 * i) / 12;
         const dist = Math.random() * 80 + 40;
         heart.style.setProperty('--ex', Math.cos(angle) * dist + 'px');
         heart.style.setProperty('--ey', Math.sin(angle) * dist + 'px');
@@ -718,7 +751,8 @@
   function abrirSorpresa(e) {
     if (e) e.stopPropagation();
     modal.classList.add('active');
-    for (let i = 0; i < 30; i++) {
+    // ✅ MEJORA 3: EXPLOSIÓN MÁS GRANDE AL ABRIR EL MODAL (40 elementos)
+    for (let i = 0; i < 40; i++) {
       setTimeout(() => {
         const heart = document.createElement('div');
         heart.className = 'explode-heart';
@@ -731,7 +765,7 @@
         heart.style.setProperty('--ey', Math.sin(angle) * dist + 'px');
         document.body.appendChild(heart);
         setTimeout(() => heart.remove(), 1000);
-      }, i * 50);
+      }, i * 40);
     }
   }
 
