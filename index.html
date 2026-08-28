@@ -573,7 +573,7 @@
 
   <!-- ✅ REPRODUCTOR DE MÚSICA DE FONDO (Volumen al 30%) -->
   <!-- ⚠️ REEMPLAZA EL "src" CON EL LINK DIRECTO DE TU CANCIÓN MP3 -->
-  <audio id="bgMusic" loop>
+  <audio id="bgMusic" loop preload="auto">
     <source src="cancion2.mp3" type="audio/mpeg">
   </audio>
 
@@ -660,13 +660,29 @@
   const hearts = ['❤️','🖤','💜','💗','🎸','🤘','⭐','✨','💫','🎊','🎉','🔥','💀','💕'];
   const notes = ['🎵','🎶','🎼','🎤','🎧'];
 
-  // ✅ CONTROL DE MÚSICA
+  // ✅ CONTROL DE MÚSICA MEJORADO
   const bgMusic = document.getElementById('bgMusic');
   const musicBtn = document.getElementById('musicBtn');
   let isPlaying = false;
 
   // Volumen al 30% para que suene suave de fondo
   bgMusic.volume = 0.3;
+  
+  // Prevenir que se corte - manejar errores
+  bgMusic.addEventListener('error', function(e) {
+    console.log("Error de audio:", e);
+    // Reintentar si hay error
+    setTimeout(() => {
+      bgMusic.load();
+      if(isPlaying) bgMusic.play();
+    }, 1000);
+  });
+  
+  // Asegurar que continúe si hay interrupción
+  bgMusic.addEventListener('stalled', function() {
+    console.log("Buffering...");
+    bgMusic.play().catch(() => {});
+  });
 
   function toggleMusic() {
     if (isPlaying) {
@@ -680,20 +696,6 @@
     }
     isPlaying = !isPlaying;
   }
-
-  musicBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleMusic();
-  });
-
-  // Intentar reproducir automáticamente en el PRIMER toque en cualquier parte de la pantalla
-  document.body.addEventListener('click', () => {
-    if (!isPlaying) {
-      bgMusic.play().then(() => {
-        isPlaying = true;
-        musicBtn.textContent = '🎵';
-      }).catch(() => {});
-    }
   }, { once: true });
 
   // Función unificada para manejar clicks y toques (explosiones)
