@@ -136,7 +136,6 @@
     50% { transform: rotate(10deg); }
   }
 
-  /* ✅ MEJORA 1: EFECTO NEÓN PARPADEANTE EN EL TÍTULO */
   .title {
     font-family: 'Anton', sans-serif;
     font-size: clamp(36px, 12vw, 55px);
@@ -337,7 +336,6 @@
     padding: 0 10px;
   }
 
-  /* ✅ MEJORA 1: EFECTO NEÓN TAMBIÉN EN EL TQM GRANDE */
   .final-message .tqm-big {
     font-family: 'Fredoka One', cursive;
     font-size: clamp(70px, 20vw, 90px);
@@ -357,7 +355,6 @@
     75% { transform: scale(1.05); }
   }
 
-  /* ✅ MEJORA 2: BOTÓN DE SORPRESA ULTRA-DRAMÁTICO */
   .surprise-btn {
     position: fixed;
     bottom: 20px;
@@ -547,9 +544,41 @@
     0%, 80% { opacity: 1; transform: translateX(-50%) translateY(0); }
     100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
   }
+
+  /* ✅ ESTILO PARA EL BOTÓN DE MÚSICA */
+  .music-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 60;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #ffd700;
+    color: #fff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .music-btn:active { transform: scale(0.9); }
 </style>
 </head>
 <body>
+
+  <!-- ✅ REPRODUCTOR DE MÚSICA DE FONDO (Volumen al 30%) -->
+  <!-- ⚠️ REEMPLAZA EL "src" CON EL LINK DIRECTO DE TU CANCIÓN MP3 -->
+  <audio id="bgMusic" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- ✅ BOTÓN FLOTANTE PARA CONTROLAR LA MÚSICA -->
+  <button class="music-btn" id="musicBtn" title="Activar/Desactivar Música">🔇</button>
 
   <div class="lightning"></div>
 
@@ -628,11 +657,46 @@
   <div class="hint"> Toca Los Vales Para Reclamarlos</div>
 
 <script>
-  // ✅ MEJORA 3: CONFETI ADICIONAL (Más variedad de emojis festivos)
   const hearts = ['❤️','🖤','💜','💗','🎸','🤘','⭐','✨','💫','🎊','🎉','🔥','💀','💕'];
   const notes = ['🎵','🎶','🎼','🎤','🎧'];
 
-  // Función unificada para manejar clicks y toques
+  // ✅ CONTROL DE MÚSICA
+  const bgMusic = document.getElementById('bgMusic');
+  const musicBtn = document.getElementById('musicBtn');
+  let isPlaying = false;
+
+  // Volumen al 30% para que suene suave de fondo
+  bgMusic.volume = 0.3;
+
+  function toggleMusic() {
+    if (isPlaying) {
+      bgMusic.pause();
+      musicBtn.textContent = '🔇';
+      musicBtn.style.opacity = '0.6';
+    } else {
+      bgMusic.play().catch(e => console.log("Esperando interacción del usuario"));
+      musicBtn.textContent = '🎵';
+      musicBtn.style.opacity = '1';
+    }
+    isPlaying = !isPlaying;
+  }
+
+  musicBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMusic();
+  });
+
+  // Intentar reproducir automáticamente en el PRIMER toque en cualquier parte de la pantalla
+  document.body.addEventListener('click', () => {
+    if (!isPlaying) {
+      bgMusic.play().then(() => {
+        isPlaying = true;
+        musicBtn.textContent = '🎵';
+      }).catch(() => {});
+    }
+  }, { once: true });
+
+  // Función unificada para manejar clicks y toques (explosiones)
   function handleInteraction(e) {
     e.preventDefault();
     const x = e.clientX || (e.touches && e.touches[0].clientX);
@@ -640,7 +704,7 @@
     
     if (!x || !y) return;
     
-    for (let i = 0; i < 12; i++) { // Aumentado a 12 para más explosión
+    for (let i = 0; i < 12; i++) {
       const heart = document.createElement('div');
       heart.className = 'explode-heart';
       heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
@@ -655,7 +719,6 @@
     }
   }
 
-  // Lluvia de corazones
   function createFallingHeart() {
     const heart = document.createElement('div');
     heart.className = 'heart-fall';
@@ -671,7 +734,6 @@
 
   setInterval(createFallingHeart, 300);
 
-  // Notas musicales
   function createNote() {
     const note = document.createElement('div');
     note.className = 'note';
@@ -686,7 +748,6 @@
 
   setInterval(createNote, 1500);
 
-  // TQM volando
   function createTQM() {
     const tqm = document.createElement('div');
     tqm.className = 'tqm';
@@ -709,7 +770,6 @@
 
   setInterval(createTQM, 1000);
 
-  // Reclamar vale - soporte click y touch
   function reclamarVale(vale) {
     if (!vale.classList.contains('reclaimed')) {
       vale.classList.add('reclaimed');
@@ -732,18 +792,16 @@
     }
   }
 
-  // Explosión al tocar la pantalla - soporte click y touch
   document.body.addEventListener('click', (e) => {
-    if (e.target.closest('.surprise-btn') || e.target.closest('.modal') || e.target.closest('.vale')) return;
+    if (e.target.closest('.surprise-btn') || e.target.closest('.modal') || e.target.closest('.vale') || e.target.closest('.music-btn')) return;
     handleInteraction(e);
   });
 
   document.body.addEventListener('touchstart', (e) => {
-    if (e.target.closest('.surprise-btn') || e.target.closest('.modal') || e.target.closest('.vale')) return;
+    if (e.target.closest('.surprise-btn') || e.target.closest('.modal') || e.target.closest('.vale') || e.target.closest('.music-btn')) return;
     handleInteraction(e);
   }, { passive: false });
 
-  // Modal sorpresa - soporte click y touch
   const modal = document.getElementById('modal');
   const surpriseBtn = document.getElementById('surpriseBtn');
   const closeBtn = document.getElementById('closeBtn');
@@ -751,7 +809,6 @@
   function abrirSorpresa(e) {
     if (e) e.stopPropagation();
     modal.classList.add('active');
-    // ✅ MEJORA 3: EXPLOSIÓN MÁS GRANDE AL ABRIR EL MODAL (40 elementos)
     for (let i = 0; i < 40; i++) {
       setTimeout(() => {
         const heart = document.createElement('div');
