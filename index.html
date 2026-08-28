@@ -545,7 +545,6 @@
     100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
   }
 
-  /* ✅ ESTILO PARA EL BOTÓN DE MÚSICA */
   .music-btn {
     position: fixed;
     top: 15px;
@@ -572,7 +571,6 @@
 <body>
 
   <!-- ✅ REPRODUCTOR DE MÚSICA DE FONDO (Volumen al 30%) -->
-  <!-- ⚠️ REEMPLAZA EL "src" CON EL LINK DIRECTO DE TU CANCIÓN MP3 -->
   <audio id="bgMusic" loop preload="auto">
     <source src="cancion2.mp3" type="audio/mpeg">
   </audio>
@@ -660,28 +658,27 @@
   const hearts = ['❤️','🖤','💜','💗','🎸','🤘','⭐','✨','💫','🎊','🎉','🔥','💀','💕'];
   const notes = ['🎵','🎶','🎼','🎤','🎧'];
 
-  // ✅ CONTROL DE MÚSICA MEJORADO
+  // ✅ CONTROL DE MÚSICA CORREGIDO Y OPTIMIZADO
   const bgMusic = document.getElementById('bgMusic');
   const musicBtn = document.getElementById('musicBtn');
   let isPlaying = false;
 
-  // Volumen al 30% para que suene suave de fondo
+  // Volumen al 30%
   bgMusic.volume = 0.3;
   
-  // Prevenir que se corte - manejar errores
+  // Manejar errores de carga
   bgMusic.addEventListener('error', function(e) {
-    console.log("Error de audio:", e);
-    // Reintentar si hay error
+    console.log("Error de audio, reintentando...", e);
     setTimeout(() => {
       bgMusic.load();
-      if(isPlaying) bgMusic.play();
+      if(isPlaying) bgMusic.play().catch(() => {});
     }, 1000);
   });
   
-  // Asegurar que continúe si hay interrupción
+  // Si el navegador pausa por ahorro de batería, intentar reanudar
   bgMusic.addEventListener('stalled', function() {
-    console.log("Buffering...");
-    bgMusic.play().catch(() => {});
+    console.log("Buffering, reanudando...");
+    if(isPlaying) bgMusic.play().catch(() => {});
   });
 
   function toggleMusic() {
@@ -690,13 +687,26 @@
       musicBtn.textContent = '🔇';
       musicBtn.style.opacity = '0.6';
     } else {
-      bgMusic.play().catch(e => console.log("Esperando interacción del usuario"));
+      bgMusic.play().catch(e => console.log("Esperando interacción"));
       musicBtn.textContent = '🎵';
       musicBtn.style.opacity = '1';
     }
     isPlaying = !isPlaying;
   }
-  }, { once: true });
+
+  // ✅ CORREGIDO: Activar música en el PRIMER toque en cualquier parte de la pantalla
+  function intentarReproducir() {
+    if (!isPlaying) {
+      bgMusic.play().then(() => {
+        isPlaying = true;
+        musicBtn.textContent = '🎵';
+        musicBtn.style.opacity = '1';
+      }).catch(() => {});
+    }
+  }
+
+  document.body.addEventListener('click', intentarReproducir, { once: true });
+  document.body.addEventListener('touchstart', intentarReproducir, { once: true });
 
   // Función unificada para manejar clicks y toques (explosiones)
   function handleInteraction(e) {
